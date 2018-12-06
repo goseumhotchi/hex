@@ -1,0 +1,64 @@
+body {
+  font-family: "Crimson Text", serif;
+  font-size: 1.2rem;
+  background-color: #ffffff;
+  color: #5e5d5d;
+  padding: 2rem;
+}
+
+#status {
+  display: block;
+  margin-bottom: 1rem;
+  min-height: 1.2rem;
+  height: 1.2rem;
+}
+#status a.tag {
+  display: inline;
+  padding: 0.1rem 0.3rem;
+  margin-right: 0.5rem;
+  background-color: #ccc;
+  color: #5d5d5d;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+#status a.tag:hover {
+  text-decoration: line-through;
+  cursor: pointer;
+}
+
+.search {
+  outline: 0;
+  border: 1px solid #000;
+  width: 90%;
+  padding: 1.2rem;
+}
+
+.searchResults {
+  border: 1px solid #fff;
+  border-top: none;
+}
+
+.searchResultEntry {
+  padding: 1.2rem;
+  border-left: 5px solid #fff;
+}
+
+.searchResultEntrySelected {
+  border-left: 5px solid #5e5d5d;
+}
+
+.searchResultDate {
+  font-size: 0.9rem;
+  color: #fff;
+  background-color: #aaa;
+  padding: 0.2rem;
+  margin-bottom: 1.5rem;
+}
+
+.searchResultEntryNone {
+  font-style: italic;
+  color: #999;
+  padding: 1.2rem;
+}
+
+/*# sourceMappingURL=main.css.map */

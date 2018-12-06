@@ -1,0 +1,6 @@
+{
+    "files": {
+        "compose"   : "./html/compose.html",
+        "find"      : "./html/find.html"
+    }
+}
