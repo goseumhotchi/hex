@@ -1,33 +1,34 @@
 
+const { app } = require('electron')
 const fs      = require('fs')
 const path    = require('path')
 const { get } = require('lodash')
 
 const { Log } = require('./Log')
 
-const config = require('../config')
-
-const cPostsPath                = get(config, 'blog.posts', './blog/posts')
-const cAnnotationTags           = get(config, 'annotations.tags', 'tags')
-const cAnnotationPublishedTo    = get(config, 'annotations.publishedTo', 'publishedTo')
-
 const tkMetaTags = 'Tags'
 
 class Exporter {
 
-    constructor() {
+    constructor(settings) {
 
         this.log = new Log('Exporter')
 
+        this.config = require(get(settings, 'configFile'))
+
+        this.cPostsPath                = path.join(get(settings, 'userBaseDir'), 'Apps/Blot/Posts')
+        this.cAnnotationTags           = get(this.config, 'annotations.tags', 'tags')
+        this.cAnnotationPublishedTo    = get(this.config, 'annotations.publishedTo', 'publishedTo')
+        
     }
 
     publish(entry) {
 
-        this.log.write(`Publishing ${entry}`)
-
         const name      = formatFilename(entry)
-        const fullpath  = path.join(cPostsPath, name)
+        const fullpath  = path.join(this.cPostsPath, name)
         const post      = formatPost(entry)
+
+        this.log.write(`Publishing ${entry} to ${fullpath}`)
 
         fs.writeFileSync(fullpath, post)
 
@@ -39,7 +40,7 @@ class Exporter {
 
         this.log.write(`Unpublishing ${entry}`)
 
-        const fullpath = path.join(cPostsPath, entry.annotations[cAnnotationPublishedTo])
+        const fullpath = path.join(this.cPostsPath, entry.annotations[this.cAnnotationPublishedTo])
         fs.unlinkSync(fullpath)
 
     }
@@ -72,8 +73,8 @@ function formatPost(entry) {
     // Metadata
     for(const key in entry.annotations) {
         
-        if (key == cAnnotationTags) {
-            post += `${tkMetaTags}: ` + entry.annotations[cAnnotationTags].join(', ') + '\n'
+        if (key == this.cAnnotationTags) {
+            post += `${tkMetaTags}: ` + entry.annotations[this.cAnnotationTags].join(', ') + '\n'
         }
 
     }

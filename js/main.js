@@ -2,18 +2,41 @@
 
 const {
     app,
-    Tray } = require('electron')
+    Tray }  = require('electron')
+const fs    = require('fs')
+const path  = require('path')
+
+const AppControl = require('./AppControl')
 
 let tray = null
 
 function initApp() {
 
-    const AppControl = require('./AppControl')
+    let env = null
+    if (process.env.ELECTRON_ENV) {
+        env = process.env.ELECTRON_ENV.trim()
+    }
+
+    // Check if a config file exists in users space, if not, create an empty one
+    const userBaseDir   = (env == 'dev') ? path.join(__dirname, '..') : path.join(app.getPath('home'), 'Dropbox')
+    const configFile    = (env == 'dev') ? path.join(userBaseDir, 'config.json') : path.join(userBaseDir, 'config.json')
+
+    console.log(userBaseDir)
+
+    if (!fs.existsSync(configFile)) {
+        fs.writeFileSync(configFile, JSON.stringify({}))
+    }
+
+    const appControl = new AppControl({
+        userBaseDir,
+        configFile
+    })
 
     tray = new Tray('./img/icon.png')
-    tray.setToolTip('Curse')
+    tray.setToolTip('HEX')
 
-    AppControl.onCompose()
+    //AppControl.onCompose()
+    //AppControl.onFind()
 
 }
 

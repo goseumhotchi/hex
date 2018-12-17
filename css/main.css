@@ -3,7 +3,16 @@ body {
   font-size: 1.2rem;
   background-color: #ffffff;
   color: #5e5d5d;
-  padding: 2rem;
+  margin: 0px;
+}
+
+body::-webkit-scrollbar {
+  width: 0.4em;
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  outline: 1px solid slategrey;
 }
 
 #status {
@@ -16,26 +25,81 @@ body {
   display: inline;
   padding: 0.1rem 0.3rem;
   margin-right: 0.5rem;
-  background-color: #ccc;
-  color: #5d5d5d;
+  color: #aaa;
   font-size: 0.9rem;
-  text-transform: uppercase;
 }
 #status a.tag:hover {
   text-decoration: line-through;
   cursor: pointer;
 }
 
+#status-public {
+  float: right;
+  margin-top: 2rem;
+  margin-right: 2rem;
+  color: #900;
+  font-size: 0.9rem;
+}
+
+.editor-wrapper {
+  padding: 2rem;
+}
+
+#editor-container {
+  display: block;
+  overflow-y: auto;
+}
+
+.ql-container {
+  font-family: "Crimson Text", serif;
+  font-size: 1.2rem;
+  color: #5e5d5d;
+}
+
+.ql-editor {
+  overflow-y: visible;
+}
+
+.searchBox {
+  display: block;
+  height: 4.5rem;
+  min-height: 4.5rem;
+  padding: 1rem;
+}
+
+.searchFor {
+  display: block;
+  height: 4.5rem;
+  min-height: 4.5rem;
+  background-color: #eee;
+  color: #5d5d5d;
+}
+.searchFor .searchStr {
+  display: block;
+  padding: 1rem;
+  font-style: italic;
+  margin-left: 2rem;
+  margin-top: 0.2rem;
+}
+
+#searchForm {
+  width: 100%;
+}
+
 .search {
+  font-family: "Crimson Text", serif;
+  font-size: 1.2rem;
   outline: 0;
   border: 1px solid #000;
-  width: 90%;
+  width: 93%;
   padding: 1.2rem;
 }
 
 .searchResults {
   border: 1px solid #fff;
   border-top: none;
+  margin-top: 10px;
+  padding: 1rem;
 }
 
 .searchResultEntry {

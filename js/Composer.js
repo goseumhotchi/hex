@@ -5,16 +5,14 @@ const {
 }               = require('electron')
 const $         = require('jquery')
 const { get }   = require('lodash')
-const Quill = require('quill')
+const Quill     = require('quill')
 
-const config = require('../config.json')
-
-const cChannelSaveContent   = get(config, 'ipc.channel.saveContent', 'ipcChannelSaveContent')
-const cChannelIdleRequest   = get(config, 'ipc.channel.idleRequest', 'ipcChannelIdleRequest')
-const cChannelSetContent    = get(config, 'ipc.channel.setContent', 'ipcChannelSetContent')
-const cAnnotationTags       = get(config, 'annotations.tags', 'tags')
-const cAnnotationTitle      = get(config, 'annotations.title', 'title')
-const cAnnotationPublic     = get(config, 'annotations.public', 'public')
+const cChannelSaveContent   = 'ipcChannelSaveContent'
+const cChannelIdleRequest   = 'ipcChannelIdleRequest'
+const cChannelSetContent    = 'ipcChannelSetContent'
+const cAnnotationTags       = 'tags'
+const cAnnotationTitle      = 'title'
+const cAnnotationPublic     = 'public'
 
 const events = {
     EVENT_HASH_DETECTED : 'EVENT_HASH_DETECTED',
@@ -43,11 +41,15 @@ class Composer {
         this.$statusPublic      = $('#status-public')
 
         this.editor = new Quill('#editor-container', {
-            theme: 'snow',
+            //theme: 'snow',
+            theme: 'bubble',
             modules: {
                 toolbar: true
-            }
+            },
+            scrollingContainer: '#editor-container',
         })
+
+        this.editor.root.focus()
 
         this.state          = states.EX_HASHTAG
         this.tagBeginsAt    = 0
@@ -82,7 +84,7 @@ class Composer {
             const { insert, retain, del } = this.findOps(delta)
             if (insert == '#') {
                 this.updateState(this.state, events.EVENT_HASH_DETECTED, { insert, retain, del })
-            } else if (insert == ' ' || insert == '\n') {
+            } else if (insert == ' ' || insert == '\n' || insert == '\t') {
                 this.updateState(this.state, events.EVENT_END_OF_WORD, { insert, retain, del})
             } else if (del != undefined) {
                 this.updateState(this.state, events.EVENT_DELETION, { insert, retain, del })
@@ -155,7 +157,7 @@ class Composer {
 
                     // Check if the hashtag was deleted
                     let retain  = get(ops, 'retain', 0)
-                    let del     = get(ops, 'delete', 0)
+                    let del     = get(ops, 'del', 0)
                     if (retain <= this.tagBeginsAt) {
                         this.tag = ''
                         next = states.EX_HASHTAG

@@ -16,13 +16,8 @@ const STYLE_WARNING         = chalk.bgRed
 const STYLE_ERROR           = chalk.bgRed
 const STYLE_FAILURE         = chalk.bgRed.bold
 
-const config = require('../config.json')
-
-const logDir        = get(config, 'log.logDir') || 'log'
-const logFilename   = get(config, 'log.logFile') || 'all.log'
-const flushOnStart  = get(config, 'log.flushOnStart') || false
-
-const logSupport = typeof fs !== 'undefined' && typeof fs.existsSync !== 'undefined'
+const logSupport    = typeof fs !== 'undefined' && typeof fs.existsSync !== 'undefined'
+const defaultLogDir = '.'
 
 const time = {
     utcString() {
@@ -30,11 +25,13 @@ const time = {
     }
 }
 
+const logFilename = 'hex.log'
+
 class Logger {
 
-    constructor() {
+    constructor(logDir) {
 
-        if (flushOnStart && logSupport && fs.existsSync(path.join(logDir, logFilename))) {
+        if (logSupport && fs.existsSync(path.join(logDir, logFilename))) {
             fs.unlinkSync(path.join(logDir, logFilename))
         }
 
@@ -146,11 +143,10 @@ class Logger {
     }
 }
 
-const LOGGER = new Logger()
-
 class Log {
 
-    constructor(component) {
+    constructor(component, logDir = defaultLogDir) {
+
         this.component = component
         this.from       = component
         const l = this.from.length
@@ -158,6 +154,9 @@ class Log {
                     (this.from.slice(0, MAX_COMPONENT_LENGTH - 3) + '...') :
                     this.from
         this.from = this.from.padEnd(MAX_COMPONENT_LENGTH)
+
+        this.LOGGER = new Logger(logDir)
+
     }
 
     static get levels() {
@@ -173,7 +172,7 @@ class Log {
     }
 
     log(obj, level = 'INFO') {
-        LOGGER.log(this.from, obj, level)
+        this.LOGGER.log(this.from, obj, level)
     }
 
     print(obj, level = 'INFO') {

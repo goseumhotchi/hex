@@ -7,41 +7,46 @@ const {
     ipcMain
 } = require('electron')
 const { get } = require('lodash')
+const path = require('path')
 
 const { Log }   = require( './Log')
 const Storage   = require('./Storage')
 const Exporter  = require('./Exporter')
 
-const config = require('../config.json')
-
-const cShortcutCompose      = get(config, 'shortcuts.compose', 'CommandOrControl+Alt+N')
-const cShortcutFind         = get(config, 'shortcuts.find', 'CommandOrControl+Alt+F')
-const cShortcutQuit         = get(config, 'shortcuts.quit', 'CommandOrControl+Alt+Q')
-const cAppStateIdle         = get(config, 'tokens.appState.idle', 'AppStateIdle')
-const cAppStateCompose      = get(config, 'tokens.appState.compose', 'AppStateCompose')
-const cAppStateFind         = get(config, 'tokens.appState.find', 'AppStateFind')
-const cWindowCompose        = get(config, 'tokens.window.compose', 'WindowCompose')
-const cWindowFind           = get(config, 'tokens.window.find', 'WindowFind')
-const cContentCompose       = get(config, 'files.compose', './html/compose.html')
-const cContentFind          = get(config, 'files.find', './html/find.html')
-const cChannelSetContent    = get(config, 'ipc.channel.setContent', 'ipcChannelSetContent')
-const cChannelSaveContent   = get(config, 'ipc.channel.saveContent', 'ipcChannelSaveContent')
-const cChannelIdleRequest   = get(config, 'ipc.channel.idleRequest', 'ipcChannelIdleRequest')
-const cChannelSearchRequest = get(config, 'ipc.channel.searchRequest', 'ipcChannelSearchRequest')
-const cChannelSearchReply   = get(config, 'ipc.channel.searchReply', 'ipcChannelSearchReply')
-const cChannelEditRequest   = get(config, 'ipc.channel.editRequest', 'ipcChannelEditRequest')
-
-const cAnnotationPublic         = get(config, 'annotations.public', 'public')
-const cAnnotationPublishedTo    = get(config, 'annotations.publishedTo', 'publishedTo')
+const cAppStateIdle             = 'AppStateIdle'
+const cAppStateCompose          = 'AppStateCompose'
+const cAppStateFind             = 'AppStateFind'
+const cWindowCompose            = 'WindowCompose'
+const cWindowFind               = 'WindowFind'
+const cContentCompose           = './html/compose.html'
+const cContentFind              = './html/find.html'
+const cChannelSetContent        = 'ipcChannelSetContent'
+const cChannelSaveContent       = 'ipcChannelSaveContent'
+const cChannelIdleRequest       = 'ipcChannelIdleRequest'
+const cChannelSearchRequest     = 'ipcChannelSearchRequest'
+const cChannelSearchReply       = 'ipcChannelSearchReply'
+const cChannelEditRequest       = 'ipcChannelEditRequest'
+const cAnnotationPublic         = 'public'
+const cAnnotationPublishedTo    = 'publishedTo'
+const cAnnotationTags           = 'tags'
 
 class AppControl {
 
-    constructor() {
+    constructor(settings) {
 
-        this.log        = new Log('AppControl')
-        this.storage    = new Storage()
-        this.exporter   = new Exporter()
+        this.config = require(get(settings, 'configFile'))
 
+        this.cShortcutCompose   = get(this.config, 'shortcuts.compose', 'CommandOrControl+Alt+N')
+        this.cShortcutFind      = get(this.config, 'shortcuts.find', 'CommandOrControl+Alt+F')
+        this.cShortcutQuit      = get(this.config, 'shortcuts.quit', 'CommandOrControl+Alt+Q')
+
+        this.log = new Log('AppControl', get(settings, 'userBaseDir'))
+        
+        this.log.write(this.config)
+
+        this.storage    = new Storage(settings)
+        this.exporter   = new Exporter(settings)
+        
         this.windows    = {
             [cWindowCompose]: null,
             [cWindowFind]   : null
@@ -52,7 +57,7 @@ class AppControl {
         }
         this.windowSettings = {
             [cWindowCompose]: {
-                frame: true
+                frame: false
             },
             [cWindowFind]   : {
                 frame   : false,
@@ -60,9 +65,9 @@ class AppControl {
             }
         }
 
-        globalShortcut.register(cShortcutCompose, () => this.onCompose())
-        globalShortcut.register(cShortcutFind, () => this.onFind())
-        globalShortcut.register(cShortcutQuit, () => this.onQuit())
+        globalShortcut.register(this.cShortcutCompose, () => this.onCompose())
+        globalShortcut.register(this.cShortcutFind, () => this.onFind())
+        globalShortcut.register(this.cShortcutQuit, () => this.onQuit())
 
         // IPC: save the content of the editor
         ipcMain.on(cChannelSaveContent, async (event, message) => {
@@ -73,7 +78,7 @@ class AppControl {
 
                 // If this was published before, unpublish
                 const old_entry = this.storage.findById(message.id)
-                if (get(old_entry, `annotations.${cAnnotationPublic}`, false) == true) {
+                if (get(old_entry, `annotations.${this.cAnnotationPublic}`, false) == true) {
                     this.exporter.unpublish(old_entry)
                     this.storage.removeAnnotation(old_entry.$loki, cAnnotationPublic)
                     this.storage.removeAnnotation(old_entry.$loki, cAnnotationPublishedTo)
@@ -89,6 +94,13 @@ class AppControl {
                 entry = this.storage.saveEntry(message.obj, message.html, message.annotations)
 
             }
+
+            // Save new tags globally
+            get(message, `annotations.${cAnnotationTags}`, []).forEach(tag => {
+                this.storage.saveTag(tag)
+            })
+
+            console.log(this.storage.findAllTags())
 
             // Publish again, or for the first time
             if (message.public) {
@@ -222,7 +234,7 @@ class AppControl {
         this.windows[id] = new BrowserWindow(
             {
                 frame   : false,
-                width   : 1400,
+                width   : 800,
                 height  : 600,
                 show    : false,
                 ...this.getWindowSettings(id)
@@ -266,6 +278,4 @@ class AppControl {
 
 }
 
-
-const appControl = new AppControl()
-module.exports = exports = appControl
+module.exports = exports = AppControl

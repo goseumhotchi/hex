@@ -1,0 +1,6 @@
+2018-12-17T15:03:07.894Z | AppControl                          INFO       
+--
+{}
+--
+2018-12-17T15:03:07.899Z | Storage                             INFO       Persisting database as C:\Users\rmos\Projects\hex_local\storage.db
+2018-12-17T15:03:07.903Z | AppControl                          DEBUG      New state: AppStateIdle

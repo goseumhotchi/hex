@@ -3,20 +3,27 @@ const { Log } = require('./Log')
 
 const { get }   = require('lodash')
 const Loki      = require('lokijs')
+const path      = require('path')
 
-const config = require('../config.json')
-
-const dbName            = get(config, 'db.name', 'storage.db')
-const dbEntries         = get(config, 'db.entries', 'entries')
-const cAnnotationTags   = get(config, 'annotations.tags', 'tags')
 
 class Storage {
 
-    constructor() {
+    constructor(settings) {
 
-        this.log = new Log('Storage')
+        this.log = new Log('Storage', get(settings, 'userBaseDir'))
 
-        this.db = new Loki(dbName, {
+        this.config = require(get(settings, 'configFile'))
+
+        this.cDBName            = get(this.config, 'db.name', 'storage.db')
+        this.cDBEntries         = get(this.config, 'db.entries', 'entries')
+        this.cDBTags            = get(this.config, 'db.tags', 'tags')
+        this.cAnnotationTags    = get(this.config, 'annotations.tags', 'tags')
+
+        const dbPath = path.join(get(settings, 'userBaseDir'), this.cDBName)
+
+        this.log.write(`Persisting database as ${dbPath}`)
+
+        this.db = new Loki(dbPath, {
             autoload        : true,
             autoloadCallback: this.initDB.bind(this),
             autosave        : true,
@@ -27,10 +34,51 @@ class Storage {
 
     initDB() {
 
-        this.entries = this.db.getCollection(dbEntries)
+        this.entries = this.db.getCollection(this.cDBEntries)
         if (this.entries === null) {
-            this.entries    = this.db.addCollection(dbEntries)    
+            this.entries = this.db.addCollection(this.cDBEntries)    
         }
+
+        this.tags = this.db.getCollection(this.cDBTags)
+        if (this.tags == null) {
+            this.tags = this.db.addCollection(this.cDBTags)
+        }
+
+    }
+
+    saveTag(tag) {
+
+        if (!this.tagExists(tag)) {
+            this.tags.insert({ tag })
+        }
+
+        // Autotag: rescan all existing entries for this tag
+        const entries = this.find(tag)
+
+        entries.forEach(entry => {
+            this.log.write(`Autotag: added tag '${tag}' to entry '${entry.$loki}'`, Log.level.DEBUG)
+            this.addEntryTag(entry.$loki, tag)
+        })
+
+    }
+
+    tagExists(tag) {
+
+        return (this.tags.find({ tag }).length > 0)
+
+    }
+
+    findAllTags() {
+
+        const result = this.tags
+        .chain()
+        .find({})
+        .compoundsort([
+            ['meta.created', true]
+        ])
+        .data()
+
+        return result
 
     }
 
@@ -99,18 +147,33 @@ class Storage {
 
     }
 
+    addEntryTag(id, tag) {
+
+        this.entries.findAndUpdate({ $loki: id}, entry => {
+
+            if (!(this.cAnnotationTags in entry.annotations)) {
+                entry.annotations[cAnnotationTags] = []
+            }
+            let tags = new Set(entry.annotations[this.cAnnotationTags])
+
+            tags.add(tag)
+            entry.annotations[this.cAnnotationTags] = [...tags]
+
+            return entry
+
+        })
+
+    }
+
     find(searchString) {
 
         this.log.write(`Searching for '${searchString}'`, Log.level.DEBUG)
 
         const result = this.entries
         .chain()
-        .find({
-            //'annotations.Tags': { '$containsAny': searchString },
-            //'text': { '$contains': searchString }
-        })
+        .find({})
         .where((obj) => {
-            let fulltext = obj.html + ' ' + get(obj, `annotations.${cAnnotationTags}`, []).join(' ')
+            let fulltext = obj.html + ' ' + get(obj, `annotations.${this.cAnnotationTags}`, []).join(' ')
             return fulltext.includes(searchString)
         })
         .compoundsort([

@@ -4,16 +4,13 @@ const {
     ipcRenderer
 }               = require('electron')
 const $         = require('jquery')
-const { get }   = require('lodash')
 
-const config = require('../config.json')
-
-const cSearchString         = get(config, 'tokens.search.searchString', 'searchString')
-const cChannelSearchRequest = get(config, 'ipc.channel.searchRequest', 'ipcChannelSearchRequest')
-const cChannelSearchReply   = get(config, 'ipc.channel.searchReply', 'ipcChannelSearchReply')
-const cChannelEditRequest   = get(config, 'ipc.channel.editRequest', 'ipcChannelEditRequest')
-const cChannelIdleRequest   = get(config, 'ipc.channel.idleRequest', 'ipcChannelIdleRequest')
-const cTextLimit            = get(config, 'search.resultTextLimit', 200)
+const cSearchString         = 'searchString'
+const cChannelSearchRequest = 'ipcChannelSearchRequest'
+const cChannelSearchReply   = 'ipcChannelSearchReply'
+const cChannelEditRequest   = 'ipcChannelEditRequest'
+const cChannelIdleRequest   = 'ipcChannelIdleRequest'
+const cTextLimit            = 200
 
 const keyCodes = {
     ESCAPE      : 27,
@@ -27,23 +24,26 @@ class Finder {
 
     constructor() {
 
-        this.$searchForm = $('#search')
+        this.$searchBox  = $('.searchBox')
+        this.$searchFor  = $('.searchFor')
+        this.$searchForm = $('#searchForm')
         this.$searchForm.on('submit', (event) => {
             event.preventDefault()
             this.requestSearch(this.$search.val())
             this.$search.val('')
         })
 
+        this.$searchFor.hide()
+
         this.$searchResults = $('.searchResults')
         this.$searchResults.hide()
 
-        this.$search        = $('.search')
+        this.$search        = $('input.search')
         this.$search.focus()
 
         ipcRenderer.on(cChannelSearchReply, (event, message) => {
             this.onSearchResult(message)
         })
-
 
         $(window).keydown(key => {
 
@@ -60,10 +60,11 @@ class Finder {
     onSearchResult(results) {
 
         this.$searchResults.empty()
+        let noresults = false
 
         if (results.length > 0) {
             results.forEach(searchResult => {
-                const content = `<span class='searchResultDate'>${searchResult.lastUpdate}</span>${this.limitText(searchResult.html, cTextLimit)}`
+                const content = `<span class='searchResultDate'>${this.humanTime(searchResult.lastUpdate)}</span>${this.limitText(searchResult.html, cTextLimit)}`
                 //const $entry = $(`<a data-ref="${searchResult.ref}" href="#" class="list-group-item list-group-item-action">${content}</a>`)
                 const $entry = $(`<div data-ref="${searchResult.$loki}" class="searchResultEntry">${content}</div>`)
                 $entry.on('click', () => this.requestEdit($entry.attr('data-ref')))
@@ -71,16 +72,22 @@ class Finder {
             })
         } else {
             this.$searchResults.append('<div class="searchResultEntryNone">No results</div>')
+            noresults = true
         }
 
         this.$searchResults.show()
 
         let $entry      = $('.searchResultEntry')
-        let selected    = null
+        let selected    = $entry.eq(0).addClass('searchResultEntrySelected')
         
         $(window).keydown(key => {
 
+
             if (key.which === keyCodes.ARROW_DOWN){
+
+                if (noresults) {
+                    return
+                }
 
                 if (selected) {
 
@@ -99,6 +106,10 @@ class Finder {
 
             } else if (key.which === keyCodes.ARROW_UP){
 
+                if (noresults) {
+                    return
+                }
+
                 if (selected) {
 
                     selected.removeClass('searchResultEntrySelected')
@@ -116,13 +127,22 @@ class Finder {
 
             } else if (key.which == keyCodes.ENTER) {
 
-                this.requestEdit(selected.attr('data-ref'))
+                if (noresults) {
+                    return
+                }
+
+                if (selected) {
+                    this.requestEdit(selected.attr('data-ref'))
+                }
 
             } else if (key.which == keyCodes.F) {
 
                 if (key.ctrlKey) {
                     selected.removeClass('searchResultEntrySelected')
                     selected = null
+                    this.$searchFor.empty()
+                    this.$searchFor.hide()
+                    this.$searchBox.show()
                     this.$search.focus()
                     window.scrollTo({top: 0})
                 }
@@ -148,7 +168,7 @@ class Finder {
 
         let result = text
 
-        if (limit > 0) {
+        if (limit > 0 && text.length > limit) {
             result = `${text.slice(0, limit - 4)} ...`
         }
 
@@ -175,6 +195,19 @@ class Finder {
         }
         ipcRenderer.send(cChannelSearchRequest, request)
 
+        if (searchString.length == 0) {
+            searchString = '(all entries)'
+        }
+        $('.searchStr').html(searchString)
+        this.$searchBox.hide()
+        this.$searchFor.show()
+
+    }
+
+    humanTime(t) {
+        const now = new Date(t)
+        const ts = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`
+        return ts
     }
 
 }
