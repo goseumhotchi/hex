@@ -1,5 +1,4 @@
 
-const { app } = require('electron')
 const fs      = require('fs')
 const path    = require('path')
 const { get } = require('lodash')
@@ -7,6 +6,10 @@ const { get } = require('lodash')
 const { Log } = require('./Log')
 
 const tkMetaTags = 'Tags'
+
+const cAnnotationTags           = 'tags'
+const cAnnotationPublishedTo    = 'publishedTo'
+
 
 class Exporter {
 
@@ -16,10 +19,7 @@ class Exporter {
 
         this.config = require(get(settings, 'configFile'))
 
-        this.cPostsPath                = path.join(get(settings, 'userBaseDir'), 'Apps/Blot/Posts')
-        this.cAnnotationTags           = get(this.config, 'annotations.tags', 'tags')
-        this.cAnnotationPublishedTo    = get(this.config, 'annotations.publishedTo', 'publishedTo')
-        
+        this.cPostsPath = path.join(get(settings, 'userBaseDir'), 'Apps/Blot/Posts')        
     }
 
     publish(entry) {
@@ -40,7 +40,7 @@ class Exporter {
 
         this.log.write(`Unpublishing ${entry}`)
 
-        const fullpath = path.join(this.cPostsPath, entry.annotations[this.cAnnotationPublishedTo])
+        const fullpath = path.join(this.cPostsPath, entry.annotations[cAnnotationPublishedTo])
         fs.unlinkSync(fullpath)
 
     }
@@ -73,8 +73,8 @@ function formatPost(entry) {
     // Metadata
     for(const key in entry.annotations) {
         
-        if (key == this.cAnnotationTags) {
-            post += `${tkMetaTags}: ` + entry.annotations[this.cAnnotationTags].join(', ') + '\n'
+        if (key == cAnnotationTags) {
+            post += `${tkMetaTags}: ` + entry.annotations[cAnnotationTags].join(', ') + '\n'
         }
 
     }

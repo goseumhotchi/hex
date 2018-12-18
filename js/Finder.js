@@ -138,9 +138,9 @@ class Finder {
             } else if (key.which == keyCodes.F) {
 
                 if (key.ctrlKey) {
-                    selected.removeClass('searchResultEntrySelected')
+                    if (selected) selected.removeClass('searchResultEntrySelected')
                     selected = null
-                    this.$searchFor.empty()
+                    //this.$searchFor.empty()
                     this.$searchFor.hide()
                     this.$searchBox.show()
                     this.$search.focus()
@@ -197,10 +197,13 @@ class Finder {
 
         if (searchString.length == 0) {
             searchString = '(all entries)'
+        } else {
+            searchString = `<span style="color: #CCC">All entries containing:</span> ${searchString}`
         }
-        $('.searchStr').html(searchString)
+        $('span.searchStr').html(searchString)
         this.$searchBox.hide()
         this.$searchFor.show()
+        $('span.searchStr').appendTo(this.$searchFor)
 
     }
 

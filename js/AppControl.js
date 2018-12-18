@@ -22,6 +22,7 @@ const cContentCompose           = './html/compose.html'
 const cContentFind              = './html/find.html'
 const cChannelSetContent        = 'ipcChannelSetContent'
 const cChannelSaveContent       = 'ipcChannelSaveContent'
+const cChannelDeleteEntry       = 'ipcChannelDeleteEntry'
 const cChannelIdleRequest       = 'ipcChannelIdleRequest'
 const cChannelSearchRequest     = 'ipcChannelSearchRequest'
 const cChannelSearchReply       = 'ipcChannelSearchReply'
@@ -78,7 +79,7 @@ class AppControl {
 
                 // If this was published before, unpublish
                 const old_entry = this.storage.findById(message.id)
-                if (get(old_entry, `annotations.${this.cAnnotationPublic}`, false) == true) {
+                if (get(old_entry, `annotations.${cAnnotationPublic}`, false) == true) {
                     this.exporter.unpublish(old_entry)
                     this.storage.removeAnnotation(old_entry.$loki, cAnnotationPublic)
                     this.storage.removeAnnotation(old_entry.$loki, cAnnotationPublishedTo)
@@ -127,6 +128,22 @@ class AppControl {
             const result = this.storage.findById(id)
 
             this.switchAppState(cAppStateCompose, result)
+
+        })
+
+        ipcMain.on(cChannelDeleteEntry, (event, message) => {
+
+            const id = parseInt(message.id)
+
+            // Also unpublish if it was published before
+            const entry = this.storage.findById(message.id)
+            if (get(entry, `annotations.${this.cAnnotationPublic}`, false) == true) {
+                this.exporter.unpublish(entry)
+            }
+
+            this.storage.deleteEntry(id)
+
+            this.switchAppState(cAppStateIdle)
 
         })
 
@@ -247,7 +264,7 @@ class AppControl {
 
         this.windows[id].loadFile(this.getWindowContent(id))
 
-        this.windows[id].webContents.openDevTools()
+        //this.windows[id].webContents.openDevTools()
 
         this.windows[id].on('closed', () => {
             this.windows[id] = null

@@ -121,6 +121,12 @@ class Storage {
 
     }
 
+    deleteEntry(id) {
+
+        this.entries.findAndRemove({ $loki: id })
+
+    }
+
     addAnnotation(id, name, value) {
 
         this.entries.findAndUpdate({ $loki: id }, entry => {

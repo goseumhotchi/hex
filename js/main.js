@@ -2,7 +2,8 @@
 
 const {
     app,
-    Tray }  = require('electron')
+    Tray,
+    Menu }  = require('electron')
 const fs    = require('fs')
 const path  = require('path')
 
@@ -34,6 +35,23 @@ function initApp() {
 
     tray = new Tray('./img/icon.png')
     tray.setToolTip('HEX')
+
+    const contextMenu = Menu.buildFromTemplate([
+        {
+            label: 'Compose',
+            click: () => appControl.onCompose()
+        },
+        {
+            label: 'Find',
+            click: () => appControl.onFind()
+        },
+        {
+            label: 'Quit',
+            click: () => appControl.onQuit()
+        }
+    ])
+
+    tray.setContextMenu(contextMenu)
 
     //AppControl.onCompose()
     //AppControl.onFind()

@@ -10,9 +10,11 @@ const Quill     = require('quill')
 const cChannelSaveContent   = 'ipcChannelSaveContent'
 const cChannelIdleRequest   = 'ipcChannelIdleRequest'
 const cChannelSetContent    = 'ipcChannelSetContent'
+const cChannelDeleteEntry   = 'ipcChannelDeleteEntry'
 const cAnnotationTags       = 'tags'
 const cAnnotationTitle      = 'title'
 const cAnnotationPublic     = 'public'
+const cDeleteDelay          = 2000
 
 const events = {
     EVENT_HASH_DETECTED : 'EVENT_HASH_DETECTED',
@@ -29,6 +31,7 @@ const states = {
 
 const keyCodes = {
     ESCAPE  : 27,
+    D       : 68,
     P       : 80
 }
 
@@ -37,6 +40,7 @@ class Composer {
     constructor() {
 
         this.$editorContainer   = $('#editor-container')
+        this.$editorWrapper     = $('#editor-wrapper')
         this.$status            = $('#status')
         this.$statusPublic      = $('#status-public')
 
@@ -57,6 +61,8 @@ class Composer {
         this.tagList        = new Set()
         this.changed        = false
         this.public         = false
+        this.deleting       = false
+        this.deleteTimer    = null
 
         const self = this
 
@@ -74,6 +80,35 @@ class Composer {
 
                 this.updatePublic()
                 this.changed = true
+
+            } else if (key.which == keyCodes.D && key.ctrlKey && !this.deleting) {
+
+                this.deleting = true
+                this.$editorContainer.fadeTo(cDeleteDelay, 0)
+                this.$status.fadeTo(cDeleteDelay, 0)
+                this.$statusPublic.fadeTo(cDeleteDelay, 0)
+                this.deleteTimer = setTimeout(() => {
+
+                    this.requestDelete()
+
+                }, cDeleteDelay)
+
+            }
+
+        })
+
+        $(window).keyup(key => {
+
+            if (key.which == keyCodes.D && key.ctrlKey && this.deleting) {
+
+                this.$editorContainer.stop(true)
+                this.$editorContainer.css('opacity', 1)
+                this.$status.stop(true)
+                this.$status.css('opacity', 1)
+                this.$statusPublic.stop(true)
+                this.$statusPublic.css('opacity', 1)
+                clearTimeout(this.deleteTimer)
+                this.deleting = false
 
             }
 
@@ -152,7 +187,6 @@ class Composer {
                 break
 
             case events.EVENT_DELETION:
-
                 if (state == states.IN_HASHTAG) {
 
                     // Check if the hashtag was deleted
@@ -270,6 +304,32 @@ class Composer {
             
         }
 
+    }
+
+    requestDelete() {
+
+        if (this.id) {
+            
+            // This was an existing entry, so delete from the DB
+            const message = {
+                id: this.id
+            }
+
+            ipcRenderer.send(cChannelDeleteEntry, message)
+
+        } else {
+
+            // Just reset the editor
+            this.$editorContainer.stop(true)
+            this.$editorContainer.css('opacity', 1)
+            this.$status.stop(true)
+            this.$status.css('opacity', 1)
+            this.$statusPublic.stop(true)
+            this.$statusPublic.css('opacity', 1)
+            this.editor.setContents({ insert: '\n' })
+            this.changed = false
+
+        }
 
     }
 
