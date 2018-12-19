@@ -12,6 +12,8 @@ from the root folder on the command line. The compiled `.exe` resides in the `di
 
 ## Usage
 
+**Warning** This tool is intended for my personal use and does not make any claims to production quality.
+
 Hex runs minimized to the system tray and registers two global keyboard shortcuts: `ctrl + alt + N` to open a new window for composing; and `ctrl + alt + F` to opend the find interface.
 
 ### How do I write a new note?
