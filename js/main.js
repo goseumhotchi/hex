@@ -19,7 +19,7 @@ function initApp() {
     }
 
     // Check if a config file exists in users space, if not, create an empty one
-    const userBaseDir   = (env == 'dev') ? path.join(__dirname, '..') : path.join(app.getPath('home'), 'Dropbox')
+    const userBaseDir   = (env == 'dev') ? path.join(__dirname, '..') : process.env.PORTABLE_EXECUTABLE_DIR
     const configFile    = (env == 'dev') ? path.join(userBaseDir, 'config.json') : path.join(userBaseDir, 'config.json')
 
     console.log(userBaseDir)

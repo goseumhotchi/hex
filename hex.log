@@ -1,17 +1,8 @@
-2018-12-18T13:11:53.340Z | AppControl                          INFO       
+2018-12-19T08:25:17.023Z | AppControl                          INFO       
 --
 {}
 --
-2018-12-18T13:11:53.343Z | Storage                             INFO       Persisting database as C:\Users\rmos\Projects\hex_local\storage.db
-2018-12-18T13:11:53.345Z | AppControl                          DEBUG      New state: AppStateIdle
-2018-12-18T13:11:57.211Z | AppControl                          INFO       New state: AppStateFind
-2018-12-18T13:11:58.145Z | Storage                             DEBUG      Searching for ''
-2018-12-18T13:11:58.867Z | Storage                             DEBUG      Searching for: 2
-2018-12-18T13:11:58.868Z | AppControl                          DEBUG      New state: AppStateCompose
-2018-12-18T13:12:08.003Z | AppControl                          DEBUG      New state: AppStateIdle
-2018-12-18T13:12:08.005Z | Storage                             DEBUG      Searching for: 2
-2018-12-18T13:12:08.018Z | Exporter                            INFO       Publishing [object Object] to C:\Users\rmos\Projects\hex_local\Apps\Blot\Posts\2018_12_18_test.html
-2018-12-18T13:12:08.007Z | Storage                             DEBUG      Searching for: 2
-2018-12-18T13:12:08.007Z | Storage                             DEBUG      Searching for 'hedgehog'
-2018-12-18T13:12:08.008Z | Storage                             DEBUG      Autotag: added tag 'hedgehog' to entry '2'
-2018-12-18T13:12:08.014Z | Storage                             DEBUG      Autotag: added tag 'hedgehog' to entry '1'
+2018-12-19T08:25:17.027Z | Storage                             INFO       Persisting database as C:\Users\rmos\Projects\hex_local\storage.db
+2018-12-19T08:25:17.029Z | AppControl                          DEBUG      New state: AppStateIdle
+2018-12-19T08:25:19.745Z | AppControl                          DEBUG      New state: AppStateCompose
+2018-12-19T08:25:22.234Z | AppControl                          DEBUG      New state: AppStateIdle

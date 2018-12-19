@@ -43,7 +43,7 @@ class AppControl {
 
         this.log = new Log('AppControl', get(settings, 'userBaseDir'))
         
-        this.log.write(this.config)
+        this.log.write(`Running in ${process.env.PORTABLE_EXECUTABLE_DIR}`)
 
         this.storage    = new Storage(settings)
         this.exporter   = new Exporter(settings)
@@ -137,7 +137,7 @@ class AppControl {
 
             // Also unpublish if it was published before
             const entry = this.storage.findById(message.id)
-            if (get(entry, `annotations.${this.cAnnotationPublic}`, false) == true) {
+            if (get(entry, `annotations.${cAnnotationPublic}`, false) == true) {
                 this.exporter.unpublish(entry)
             }
 

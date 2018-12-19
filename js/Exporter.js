@@ -1,4 +1,5 @@
 
+const { app } = require('electron')
 const fs      = require('fs')
 const path    = require('path')
 const { get } = require('lodash')
@@ -19,7 +20,10 @@ class Exporter {
 
         this.config = require(get(settings, 'configFile'))
 
-        this.cPostsPath = path.join(get(settings, 'userBaseDir'), 'Apps/Blot/Posts')        
+        const publishingPath = get(this.config, 'publishing.path', path.join(app.getPath('home'), 'Dropbox/Apps/Blot/Posts'))
+
+        this.cPostsPath = publishingPath
+
     }
 
     publish(entry) {
