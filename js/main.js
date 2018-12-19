@@ -33,7 +33,7 @@ function initApp() {
         configFile
     })
 
-    tray = new Tray('./img/icon.png')
+    tray = new Tray('./img/trayicon.png')
     tray.setToolTip('HEX')
 
     const contextMenu = Menu.buildFromTemplate([

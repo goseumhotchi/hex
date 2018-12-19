@@ -14,7 +14,7 @@ class Storage {
 
         this.config = require(get(settings, 'configFile'))
 
-        this.cDBName            = get(this.config, 'db.name', 'storage.db')
+        this.cDBName            = get(this.config, 'db.name', 'hex.db')
         this.cDBEntries         = get(this.config, 'db.entries', 'entries')
         this.cDBTags            = get(this.config, 'db.tags', 'tags')
         this.cAnnotationTags    = get(this.config, 'annotations.tags', 'tags')

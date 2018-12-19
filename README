@@ -1,0 +1,44 @@
+# HEX
+
+Hex is a deliberately simple and fast note-taking tool which doubles as a publishing pipeline to [blot](http://blot.im).
+
+## Installation
+
+Hex is built on [electron](https://electronjs.org). It is meant to be compiled as a portable application to be either hauled around on a USB stick or put in your dropbox. To compile a portable windows application, run
+
+    npm install && npm run dist
+
+from the root folder on the command line. The compiled `.exe` resides in the `dist` folder.
+
+## Usage
+
+Hex runs minimized to the system tray and registers two global keyboard shortcuts: `ctrl + alt + N` to open a new window for composing; and `ctrl + alt + F` to opend the find interface.
+
+### How do I write a new note?
+
+Hit the global keyboard shortcut `ctrl + alt + N` to bring up the editing window and start typing. When you are done, simply press `esc` to close the window. Your work will be saved.
+
+### How do I read or edit existing notes?
+
+Hit the global keyboard shortcut `ctrl + alt + F` to bring up the find interface. Type a search string and hit enter. Hex will provide a list or results you can navigate through with the arrow keys. Press `enter` to view or edit an existing entry.
+
+Search results are sorted by date, most recent entry first. The search currently looks for the provided substring in the full text of the entry, including tags.
+
+### How do I tag my notes?
+
+Type the pound/sharp/hash symbol '#' to start a hashtag. Hitting `space` or `enter` will close the tag, remove it from the text and add it to the hash tag list on top of the editing interface. 
+To delete a previously entered hashtag, click on it with the mouse.
+
+### How do I delete entries?
+
+Find and select the entry you wish to delete. In the editing interface, hold `ctrl + d` and watch the note fade. When the editing window closes, the note is deleted. If you have second thoughts, just release `ctrl + d` before the note is fully gone.
+
+If you hold `ctrl + d` on an entry that was not previously saved, the editing window will remain open to allow you to try again.
+
+### How do i publish to Blot?
+
+In the editing interface, hit `ctrl + p` to publish or unpublish your note. Hex will export your content, including hashtags, to your blot folder, as soon as you save your note.
+
+### Where is my data?
+
+Hex stores all content in a file called `hex.db`
